@@ -2,6 +2,10 @@
 
 ## What this project is
 
+Working name: **Batchmate** (not final). The name lives only in `SITE_NAME` in
+`src/config/site.ts` and the URL in the `NEXT_PUBLIC_SITE_URL` env var; every title, meta tag,
+footer and email reads from there. Never hard-code the name anywhere else.
+
 A community platform for people arriving somewhere new, starting with IT freshers joining
 2–3 large recruiters in Bengaluru. It connects newcomers by **identity** (company batch,
 hometown), **place** (area, tech park) and **need** (asks: flatmate, PG, commute buddy, etc.),
@@ -41,13 +45,19 @@ Other docs:
 - Next.js (latest stable, App Router) + TypeScript (`strict: true`), Tailwind, shadcn/ui
 - Supabase (region: ap-south-1 / Mumbai): Postgres, Auth, Storage
 - Drizzle ORM + drizzle-kit for schema and migrations
-- Auth: Google OAuth first; phone OTP via Supabase Send SMS hook → MSG91 (added once DLT approval lands)
+- Auth: Google OAuth + email magic links (Supabase Auth, custom SMTP via Resend free tier). No phone OTP during validation.
 - Zod for all input validation
 - Upstash Redis (`@upstash/ratelimit`) for rate limiting
 - Resend for email (digests, intro accepted)
 - PostHog (analytics + feature flags), Sentry (errors)
-- Moderation: an LLM/moderation API behind `src/lib/moderation.ts` so the provider can be swapped
-- Hosting: Vercel
+- Moderation: OpenAI's free moderation endpoint behind `src/lib/moderation.ts` so the provider can be swapped.
+  Our own scam-pattern filter always runs first; anything uncertain (including Hinglish the API may miss)
+  goes to the held queue, never straight to published.
+- Hosting: Vercel Hobby during validation (non-commercial terms; see Scale path in ARCHITECTURE.md)
+- Scheduled jobs: pure-SQL jobs run in Supabase `pg_cron`; jobs that send email run from a
+  secret-protected route called by Vercel Cron (Hobby allows at most daily runs)
+
+**Zero cost is a hard constraint during validation.** Only free tiers; no paid APIs, domains or plans.
 - Tests: Vitest (unit + DB/RLS tests against local Supabase), Playwright (critical e2e flows)
 - Package manager: pnpm
 

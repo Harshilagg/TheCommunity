@@ -17,7 +17,7 @@ switch to licensed originals (web licences needed) only after the Scale decision
 | Role | Validation font | Later (licensed) |
 |------|-----------------|------------------|
 | Capital letters in display headlines | Bodoni Moda italic 400 | Trovical Calm |
-| Everything else | Jost (400 body, 500 UI, 900 display) | Futura (100 for display) |
+| Everything else | Jost (400 body, 500 UI, 900 display) | Futura (Extra Bold for display) |
 
 ### Headline treatment (the signature)
 

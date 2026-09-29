@@ -66,7 +66,7 @@ Record the decision and the numbers in `docs/BACKLOG.md` under "Sprint log".
 |-------|-----------|
 | `public_page_viewed` | page_type (`company_dates`/`area`/`tech_park`/`city`), city, slug, referrer_type |
 | `cta_find_batch_clicked` | page_type, slug |
-| `signup_completed` | method (`google`/`phone`) |
+| `signup_completed` | method (`google`/`email`) |
 | `onboarding_step_completed` | step |
 | `onboarding_completed` | reason, has_company, has_joining_date, areas_count, intents |
 | `rooms_assigned` | count, kinds |

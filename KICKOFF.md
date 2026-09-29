@@ -3,8 +3,8 @@
 ## Before the first session (accounts)
 
 Create (free tiers are fine for the build): GitHub repo, Supabase (Mumbai region), Vercel,
-PostHog, Sentry, Resend, Upstash, Google Cloud OAuth client. Start MSG91 DLT registration
-now — approval can take a while and phone OTP depends on it.
+PostHog, Sentry, Resend, Upstash, OpenAI (moderation endpoint only, which is free), Google Cloud
+OAuth client. No domain yet: deploy to the free `*.vercel.app` subdomain.
 Check the current pricing and plan terms of each service before launch (for example,
 whether a free/hobby tier permits commercial use and whether free databases pause when idle).
 

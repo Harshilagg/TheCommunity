@@ -67,7 +67,7 @@ intro_requests(id, from_id, to_id, ask_id NULL, message,
 
 -- information
 joining_reports(id, user_id, company_id, office_id, batch_label, received_on,
-                joining_date, source, weight, created_at)  UNIQUE(user_id, company_id, office_id)
+                joining_date, source, weight, created_at)  UNIQUE NULLS NOT DISTINCT(user_id, company_id, office_id)
 cohort_stats(company_id, office_id, month, reported, joining, seeking_flatmates, updated_at)
 area_stats(area_id, newcomers_by_month jsonb, open_asks_by_type jsonb, updated_at)
 
@@ -96,22 +96,27 @@ Indexes: `room_memberships(user_id)`, `posts(room_id, created_at desc)`,
 
 ## Flows
 
-1. **Arrival → connection**: public page (ISR) → "Find your batch" → Google/OTP →
+1. **Arrival → connection**: public page (ISR) → "Find your batch" → Google/email link →
    onboarding → `assign_rooms` → home shows matches → Connect → intro accepted → handles revealed.
 2. **Ask created**: validate + moderate → insert → `match_asks` shown immediately →
    `events` for matched users → `area_stats` refresh.
 3. **Joining report**: insert → `cohort_stats` refresh → events for cohort members awaiting dates.
 
-## Background jobs (Vercel Cron → `/api/cron/*`, secret-protected)
+## Background jobs
 
+Pure-SQL jobs run in Supabase `pg_cron` (free, host-independent):
 - refresh `cohort_stats`, `area_stats` (every 15 min)
-- email digest from unsent `events` (daily); intro-accepted emails sent immediately
 - expire asks and intro requests (hourly)
 - preparing → settled after arrival date (daily)
+
+Jobs that need the app (email, Storage API) run from Vercel Cron → `/api/cron/*`, secret-protected.
+Hobby cron runs at most once a day:
+- email digest from unsent `events` (daily); intro-accepted emails are sent immediately from the action
 - delete any verification file older than 7 days as a safety net (daily)
 
 ## Scale path (only after the validation gate says Scale)
 
-Supabase Pro + Vercel Pro → web push + WhatsApp digests → groups UI → area guide
+Supabase Pro + Vercel Pro (Vercel Hobby is non-commercial only, so partner listings or any revenue
+need Pro or another host such as Cloudflare Workers via OpenNext) → buy a domain → web push + WhatsApp digests → groups UI → area guide
 (rent/commute reports + cached Maps) → next companies/cities → partner listings (revenue)
 → Meilisearch only if Postgres search is slow → marketplace, meetups, travel-together.

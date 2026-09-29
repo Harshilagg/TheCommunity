@@ -15,21 +15,24 @@ Goal: an empty but deployed, instrumented app with a local dev loop.
 - [ ] **S0-2 Supabase + Drizzle** — local Supabase via CLI, Drizzle config, first empty migration, `src/lib/supabase/{server,client,admin}.ts` using `@supabase/ssr`.
   AC: migration applies locally; server client reads session from cookies.
 - [ ] **S0-3 CI** — GitHub Actions: install, lint, typecheck, unit tests on PR.
-- [ ] **S0-4 Deploy** — Vercel project linked, preview + production envs, custom domain.
+- [ ] **S0-4 Deploy** — Vercel (Hobby) project linked, preview + production envs, free `*.vercel.app` subdomain (no paid domain or DNS yet).
   AC: production URL serves the placeholder home page.
 - [ ] **S0-4b Design tokens** — implement `docs/DESIGN.md`: fonts via `next/font/google` (Bodoni Moda + Jost), Tailwind colour tokens, paper grain, `<GrainHeadline>`, base button and row-list components.
-  AC: placeholder home page shows `<DisplayHeading>` (serif-italic first letters + Jost 900, grainy ink) on the granular paper background.
+  AC: placeholder home page shows `<GrainHeadline>` (serif-italic first letters + Jost 900, solid ink) on the grained paper background.
 - [ ] **S0-5 Observability** — PostHog (typed `track()` wrapper in `src/lib/analytics`) and Sentry with PII scrubbing.
   AC: a test event appears in PostHog; a thrown test error appears in Sentry without user PII.
 - [ ] **S0-6 Validation targets** — review `docs/VALIDATION.md` targets with the owner and freeze them. *(owner task)*
-- [ ] **S0-7 Non-code setup** *(owner task)* — start MSG91 DLT registration; Google OAuth client; draft privacy policy + terms.
+- [ ] **S0-7 Non-code setup** *(owner task)* — Google OAuth client; Resend account (free tier) for Supabase auth emails; draft privacy policy + terms.
 
 ## Sprint 1 — Schema, seed, public skeleton
 
 Goal: the full data model with RLS, Bengaluru seeded, and indexable public pages live early (SEO takes weeks).
 
-- [ ] **S1-1 Reference schema + seed** — cities, areas, tech_parks, companies, offices; seed Bengaluru (~50 areas, main tech parks, 2–3 target companies' offices).
-  AC: `pnpm db:seed` is idempotent; public read-only RLS on reference tables.
+- [ ] **S1-1 Reference schema + seed** — cities, areas, tech_parks, companies, offices; seed Bengaluru (~50 areas, main tech parks) and these offices, each linked to its area and tech park
+  (verify names and areas before writing the seed): Infosys — Electronic City; TCS — Whitefield, Electronic City;
+  Wipro — Sarjapur Road, Electronic City; Accenture — Manyata Tech Park, Whitefield.
+  AC: `pnpm db:seed` is idempotent; public read-only RLS on reference tables. Accenture has no public pages
+  until Infosys/TCS/Wipro have activity (`companies.status`).
 - [ ] **S1-2 Core schema + RLS** — all tables in ARCHITECTURE.md (groups UI not needed, but `rooms.parent_id/status` exist).
   AC: RLS on every table; tests prove: users can't read others' contact_handles; can't edit others' posts/asks; blocked users are hidden.
 - [ ] **S1-3 Public page templates** — `/bengaluru`, `/bengaluru/companies/[company]/joining-dates`, `/bengaluru/areas/[area]`, `/bengaluru/tech-parks/[park]`.
@@ -41,7 +44,7 @@ Goal: the full data model with RLS, Bengaluru seeded, and indexable public pages
 
 Goal: a newcomer can sign up and land in the right rooms.
 
-- [ ] **S2-1 Auth** — Google login; login/callback pages; protected `(app)` layout. Phone OTP story is S5-6.
+- [ ] **S2-1 Auth** — Google login + email magic link (Supabase Auth, SMTP via Resend free tier); login/callback pages; protected `(app)` layout.
   EV: `signup_completed`.
 - [ ] **S2-2 Onboarding** — steps: reason + city → company/office/joining date (or "awaited") → arrival date + hometown → areas considering (multi-select) → budget + "open to" intents. Progress saved per step; only city + reason required.
   AC: completes in < 1 minute on mobile; editable later in settings.
@@ -50,7 +53,8 @@ Goal: a newcomer can sign up and land in the right rooms.
   AC: idempotent; tests cover awaited → known date move, area change, hometown change.
   EV: `rooms_assigned`.
 - [ ] **S2-4 Room page** — Discussion / Questions / Asks tabs, member count, paginated feed, create post, reply, mark answered.
-  AC: posts go through rate limit + moderation (+ held state); empty states.
+  AC: posts go through rate limit → scam-pattern filter → OpenAI moderation; flagged or uncertain → held; empty states.
+  Builds the minimal `src/lib/safety/` and `src/lib/moderation.ts` that S5-3 extends.
   EV: `room_viewed`, `post_created`, `reply_created`.
 - [ ] **S2-5 Home v1** — my rooms (member counts, recent activity) + city feed ranked by my areas/tech park/arrival month.
 
@@ -60,8 +64,8 @@ Goal: the traffic hook — live, crowdsourced data on public pages.
 
 - [ ] **S3-1 Report joining date** — form in the company room + on home; one editable report per user per company/office; verified users weighted higher.
   EV: `joining_report_submitted`.
-- [ ] **S3-2 Stats jobs** — `cohort_stats` + `area_stats` refresh via Vercel Cron (secret-protected route).
-- [ ] **S3-3 Public pages show live data** — "312 reported · 48 joining in October · 12 seeking flatmates", recent (anonymised) reports timeline.
+- [ ] **S3-2 Stats jobs** — `cohort_stats` + `area_stats` refresh via Supabase `pg_cron` (every 15 min, pure SQL).
+- [ ] **S3-3 Public pages show live data** — written as a sentence or table rows, e.g. "312 people have reported. 48 join in October, and 12 of them are looking for flatmates." Recent (anonymised) reports timeline.
   AC: public pages read only aggregate tables; no names or handles.
 - [ ] **S3-4 Cohort updates on home** — "Your batch: 3 new reports this week".
 
@@ -75,7 +79,7 @@ Goal: two newcomers from different companies can find each other around a need a
   AC: tests cover gender pref both ways, blocks, budget/date overlap, self-exclusion.
   EV: `ask_matches_shown`.
 - [ ] **S4-3 Asks in place rooms** — Asks tab lists open asks for that area/tech park with filters.
-- [ ] **S4-4 People directory** — per area: newcomers by move-in month, filter by intents; cards show overlap with me ("both moving Nov · both from Jaipur").
+- [ ] **S4-4 People directory** — per area: newcomers by move-in month, filter by intents; rows show overlap with me as a sentence ("You're both moving in November and both from Jaipur").
   EV: `people_directory_viewed`.
 - [ ] **S4-5 Intro flow** — request (optional message) → accept/decline → contact handles revealed; limits on pending requests per day.
   AC: RLS test proves handles unreadable before acceptance.
@@ -94,7 +98,6 @@ Goal: safe enough to open to strangers; measurement ready.
 - [ ] **S5-4 Admin** — `/admin` (role-gated): reports, held posts, verifications, new company/office suggestions.
 - [ ] **S5-5 Fake door** — "Verified PGs & co-living near [office]" card for users with housing asks; opt-in with consent.
   EV: `fake_door_pg_clicked`, `fake_door_pg_opted_in`.
-- [ ] **S5-6 Phone OTP** — Supabase Send SMS hook → MSG91 (once DLT approved).
 - [ ] **S5-7 Digest email** — daily digest from `events` via Resend; intro-accepted email immediately; unsubscribe link.
 - [ ] **S5-8 Account deletion + data export** in settings.
 - [ ] **S5-9 PostHog dashboards** from VALIDATION.md.
@@ -113,8 +116,10 @@ Goal: safe enough to open to strangers; measurement ready.
 
 Groups UI with incubation + duplicate detection · area guide (rent/commute reports, Maps cache) ·
 web push · WhatsApp notifications · invite-your-batchmates links · realtime feeds ·
-travel together · meetups · marketplace · partner PG listings + payments · more cities.
+travel together · meetups · marketplace · partner PG listings + payments · more cities ·
+phone OTP login (Supabase Send SMS hook → MSG91, needs DLT registration).
 
 ## Sprint log
 
 <!-- One line per completed story or decision: date — ID — note -->
+2026-09-29 — decision — Zero-cost stack for validation: Vercel Hobby, Google + email magic link (no phone OTP), OpenAI free moderation, pg_cron for SQL jobs. Working name "Batchmate".
