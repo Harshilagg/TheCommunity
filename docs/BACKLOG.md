@@ -10,7 +10,7 @@ Tick `[x]` when the Definition of Done in CLAUDE.md is met.
 
 Goal: an empty but deployed, instrumented app with a local dev loop.
 
-- [ ] **S0-1 Project scaffold** — Next.js App Router + TS strict + Tailwind + shadcn/ui + pnpm scripts from CLAUDE.md.
+- [x] **S0-1 Project scaffold** — Next.js App Router + TS strict + Tailwind + shadcn/ui + pnpm scripts from CLAUDE.md.
   AC: `pnpm dev`, `lint`, `typecheck`, `test` all run; `.env.example` lists every env var.
 - [ ] **S0-2 Supabase + Drizzle** — local Supabase via CLI, Drizzle config, first empty migration, `src/lib/supabase/{server,client,admin}.ts` using `@supabase/ssr`.
   AC: migration applies locally; server client reads session from cookies.
@@ -123,3 +123,4 @@ phone OTP login (Supabase Send SMS hook → MSG91, needs DLT registration).
 
 <!-- One line per completed story or decision: date — ID — note -->
 2026-09-29 — decision — Zero-cost stack for validation: Vercel Hobby, Google + email magic link (no phone OTP), OpenAI free moderation, pg_cron for SQL jobs. Working name "Batchmate".
+2026-09-29 — S0-1 — Next.js 16 + TS strict + Tailwind 4 + shadcn/ui (radix), Vitest + Playwright (mobile + desktop), site name in `src/config/site.ts`.

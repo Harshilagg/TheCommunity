@@ -152,3 +152,5 @@ Create these scripts in `package.json` during Sprint 0 if they don't exist.
   explains what will appear and invites the first action.
 - Copy is plain, friendly, Indian-English; amounts in ₹.
 - Small commits with conventional messages (`feat:`, `fix:`, `chore:`, `test:`).
+
+@AGENTS.md
